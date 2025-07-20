@@ -9,12 +9,6 @@ import (
 	"github.com/v-venes/friends-achievements-bot/pkg/broker"
 )
 
-func failOnError(err error, msg string) {
-	if err != nil {
-		log.Panicf("%s: %s", msg, err)
-	}
-}
-
 func init() {
 	err := godotenv.Load()
 	if err != nil {
@@ -30,7 +24,7 @@ func main() {
 		Host:     env.BrokerHost,
 	})
 	if err != nil {
-		failOnError(err, "Error creating bot")
+		log.Fatalf("Erro ao conectar com broker %s", err.Error())
 	}
 
 	bot, err := discordbot.NewBot(discordbot.NewBotParams{
@@ -39,8 +33,11 @@ func main() {
 		Broker:         broker,
 	})
 	if err != nil {
-		failOnError(err, "Error creating bot")
+		log.Fatalf("Erro ao criar bot %s", err.Error())
 	}
 
 	bot.Run()
+
+	defer broker.Channel.Close()
+	defer broker.Connection.Close()
 }

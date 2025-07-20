@@ -3,6 +3,7 @@ package broker
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 
 	"github.com/rabbitmq/amqp091-go"
 )
@@ -14,6 +15,8 @@ const (
 	NewAchievement
 )
 
+const APP_BROKER_EXCHANGE = "ACHIEVEMENTS-BOT"
+
 type NewBroketParams struct {
 	Username string
 	Password string
@@ -21,8 +24,9 @@ type NewBroketParams struct {
 }
 
 type Broker struct {
-	Channel *amqp091.Channel
-	Queues  map[BrokerQueueEnum]amqp091.Queue
+	Connection *amqp091.Connection
+	Channel    *amqp091.Channel
+	Queues     map[BrokerQueueEnum]*amqp091.Queue
 }
 
 type SendMessageParams struct {
@@ -46,21 +50,20 @@ func NewBroker(params NewBroketParams) (*Broker, error) {
 		return nil, err
 	}
 
-	queues := make(map[BrokerQueueEnum]amqp091.Queue)
-	for key, v := range BrokerQueues {
-		q, err := ch.QueueDeclare(v, false, false, false, false, nil)
+	queues := make(map[BrokerQueueEnum]*amqp091.Queue)
+	for key, queueName := range BrokerQueues {
+		q, err := ch.QueueDeclare(queueName, true, false, false, false, nil)
 		if err != nil {
 			return nil, err
 		}
 
-		queues[key] = q
+		queues[key] = &q
 	}
 
-	defer ch.Close()
-	defer conn.Close()
 	return &Broker{
-		Channel: ch,
-		Queues:  queues,
+		Connection: conn,
+		Channel:    ch,
+		Queues:     queues,
 	}, nil
 }
 
@@ -70,11 +73,17 @@ func (b *Broker) SendMessage(params SendMessageParams) error {
 		return nil
 	}
 
-	b.Channel.Publish("", b.Queues[params.Queue].Name, false, false, amqp091.Publishing{
-		ContentType: "application/json",
-		Body:        body,
+	err = b.Channel.Publish("", b.Queues[params.Queue].Name, false, false, amqp091.Publishing{
+		ContentType:  "application/json",
+		Body:         body,
+		DeliveryMode: 2,
 	})
+	if err != nil {
+		log.Printf("Erro ao enviar mensagem [%s]: %s", b.Queues[params.Queue].Name, err.Error())
+		return err
+	}
 
+	log.Printf("Mensagem enviada para queue %s", b.Queues[params.Queue].Name)
 	return nil
 }
 

@@ -74,10 +74,8 @@ Um bot de Discord desenvolvido em Go que envia diariamente as conquistas da Stea
 ```
 .
 ├── discord-bot/         # Bot do Discord (escuta fila e envia mensagens)
-├── backend/             # Lógica de extração e comparação de conquistas
-├── workflows/           # Workflows do Temporal
-├── docker-compose.yml   # Serviços de RabbitMQ, Temporal, etc
-└── README.md
+├── server/             # Lógica de extração e comparação de conquistas
+└── workflows/           # Workflows do Temporal
 ```
 
 ---
@@ -90,9 +88,12 @@ Esse projeto é open source sob a licença [MIT](LICENSE).
 
 ## ✨ TODO
 
-- [ ] Criação do bot e comando para adicionar conta
-- [ ] Setup do RabbitMQ e conexão com o bot
+- [x] Criação do bot e comando para adicionar conta
+- [x] Setup do RabbitMQ e conexão com o bot
 - [ ] Cadastro de SteamID via comando
+  - [ ] Verificar SteamID pela api
+  - [ ] Fazer integração com banco para guardar SteamID
+  - [ ] Enviar mensagem através do bot para informar a status
 - [ ] Workflow básico no Temporal
   - [ ] Extração dos últimos jogos para cada SteamID
   - [ ] Comparação de conquistas

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
+	"github.com/v-venes/friends-achievements-bot/internal/discord-bot/shared/models"
 	"github.com/v-venes/friends-achievements-bot/pkg/broker"
 )
 
@@ -16,13 +17,6 @@ type SlashCommand struct {
 
 type SlashCommandRouterParams struct {
 	Broker *broker.Broker
-}
-
-type AddAccountPayload struct {
-	SteamID    string    `json:"steam_id"`
-	Username   string    `json:"username"`
-	GuildID    string    `json:"guild_id"`
-	ExecutedAt time.Time `json:"executed_at"`
 }
 
 func GetSlashCommands(params SlashCommandRouterParams) []SlashCommand {
@@ -50,19 +44,23 @@ func GetSlashCommands(params SlashCommandRouterParams) []SlashCommand {
 
 				steamID := data.Options[0].StringValue()
 
-				payload := AddAccountPayload{
+				payload := models.AddAccountMessage{
 					SteamID:    steamID,
 					Username:   i.Member.User.Username,
 					GuildID:    i.GuildID,
+					ChannelID:  i.ChannelID,
 					ExecutedAt: time.Now(),
 				}
 
-				params.Broker.SendMessage(broker.SendMessageParams{
+				err := params.Broker.SendMessage(broker.SendMessageParams{
 					Queue:   broker.NewSteamId,
 					Message: payload,
 				})
+				if err != nil {
+					return
+				}
 
-				err := s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
+				err = s.InteractionRespond(i.Interaction, &discordgo.InteractionResponse{
 					Type: discordgo.InteractionResponseChannelMessageWithSource,
 					Data: &discordgo.InteractionResponseData{
 						Content: fmt.Sprintf(
