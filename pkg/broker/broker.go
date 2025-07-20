@@ -1,6 +1,7 @@
 package broker
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/rabbitmq/amqp091-go"
@@ -26,7 +27,7 @@ type Broker struct {
 
 type SendMessageParams struct {
 	Queue   BrokerQueueEnum
-	Message []byte
+	Message any
 }
 
 var BrokerQueues = map[BrokerQueueEnum]string{
@@ -64,9 +65,14 @@ func NewBroker(params NewBroketParams) (*Broker, error) {
 }
 
 func (b *Broker) SendMessage(params SendMessageParams) error {
+	body, err := json.Marshal(params.Message)
+	if err != nil {
+		return nil
+	}
+
 	b.Channel.Publish("", b.Queues[params.Queue].Name, false, false, amqp091.Publishing{
-		ContentType: "text/plain",
-		Body:        params.Message,
+		ContentType: "application/json",
+		Body:        body,
 	})
 
 	return nil
