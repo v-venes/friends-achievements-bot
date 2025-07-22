@@ -12,6 +12,7 @@ type Environment struct {
 	BrokerHost      string `env:"BROKER_HOST"`
 	BrokerUsername  string `env:"BROKER_USERNAME"`
 	BrokerPassword  string `env:"BROKER_PASSWORD"`
+	SteamKey        string `env:"STEAM_KEY"`
 }
 
 func GetEnvVars() *Environment {

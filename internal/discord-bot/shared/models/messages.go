@@ -2,6 +2,7 @@ package models
 
 import "time"
 
+// TODO: Mover esse cara lá para o pkg
 type AddAccountMessage struct {
 	SteamID    string    `json:"steam_id"`
 	Username   string    `json:"username"`
