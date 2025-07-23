@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/joho/godotenv"
-	"github.com/v-venes/friends-achievements-bot/internal/server"
+	queueworker "github.com/v-venes/friends-achievements-bot/internal/queue_worker"
 	"github.com/v-venes/friends-achievements-bot/pkg"
 	"github.com/v-venes/friends-achievements-bot/pkg/broker"
 	"github.com/v-venes/friends-achievements-bot/pkg/service"
@@ -19,8 +23,17 @@ func init() {
 
 func main() {
 	env := pkg.GetEnvVars()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
-	broker, err := broker.NewBroker(broker.NewBroketParams{
+	signalChan := make(chan os.Signal, 1)
+	signal.Notify(signalChan, syscall.SIGINT, syscall.SIGTERM)
+	go func() {
+		<-signalChan
+		cancel()
+	}()
+
+	newBroker, err := broker.NewBroker(broker.NewBroketParams{
 		Username: env.BrokerUsername,
 		Password: env.BrokerPassword,
 		Host:     env.BrokerHost,
@@ -33,13 +46,12 @@ func main() {
 		SteamKey: env.SteamKey,
 	})
 
-	server := server.NewServer(server.NewServerParams{
-		Broker:      broker,
+	worker := queueworker.NewQueueWorker(queueworker.NewQueueWorkerParams{
+		Broker:      newBroker,
 		SteamClient: steamClient,
 	})
 
-	err = server.Run()
-	if err != nil {
-		log.Fatalf("Erro ao iniciar servidor %s", err.Error())
+	if err := worker.Run(ctx); err != nil {
+		log.Fatalf("Erro ao iniciar worker: %v", err)
 	}
 }

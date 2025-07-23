@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/bwmarrin/discordgo"
-	"github.com/v-venes/friends-achievements-bot/internal/discord-bot/shared/models"
 	"github.com/v-venes/friends-achievements-bot/pkg/broker"
+	"github.com/v-venes/friends-achievements-bot/pkg/models"
 )
 
 type SlashCommand struct {
