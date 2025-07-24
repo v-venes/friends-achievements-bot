@@ -16,12 +16,13 @@ Um bot de Discord desenvolvido em Go que envia diariamente as conquistas da Stea
 
 ### 🔹 Discord Bot (Go)
 
-- Responsável por escutar comandos no Discord (ex: `/add-account`)
+- Responsável por escutar comandos no Discord (ex: `/adicionar-conta`)
 - Escuta uma fila no RabbitMQ para receber eventos de novas conquistas
 - Envia mensagens com imagens das conquistas para os canais apropriados
 
-### 🔸 Backend (Go)
+### 🔸 Queue Worker (Go)
 
+- Escuta as demais filas do RabbitMQ
 - Armazena SteamIDs dos usuários
 - Roda uma rotina diária (orquestrada com **Temporal**) que:
   1. Busca os jogos jogados recentemente
@@ -45,11 +46,15 @@ Um bot de Discord desenvolvido em Go que envia diariamente as conquistas da Stea
 ## 🚀 Como funciona o fluxo
 
 ```
-1. [Usuário] usa comando /add-account no Discord
-2. [Bot] envia SteamID para o backend
+1. [Usuário] usa comando /adicionar-conta no Discord
+2. [Bot] envia SteamID para fila
+3. [Worker] recebe a mensagem
+  3.1 confere se o SteamID existe
+  3.2 salva o player referente ao SteamID envia uma mensagem de feedback de sucesso caso exista
+  3.3 envia uma mensagem de feedback de erro informando que o SteamID não existe
 3. [Scheduler] inicia workflow diário (Temporal):
-    ├─ Busca jogos recentes na Steam
-    ├─ Coleta conquistas
+    ├─ Busca jogos recentes na Steam para os Players
+    ├─ Coleta conquistas para cada jogo
     ├─ Compara com histórico
     ├─ Gera imagem
     └─ Publica evento na fila
@@ -64,6 +69,7 @@ Um bot de Discord desenvolvido em Go que envia diariamente as conquistas da Stea
 - **Go**: linguagem principal
 - **discordgo**: biblioteca para integração com Discord
 - **RabbitMQ**: mensageria para comunicação assíncrona
+- **Mongodb**: banco de dados geral
 - **Temporal**: orquestração de workflows
 - **Steam Web API**: coleta de dados dos jogos e conquistas
 
@@ -74,7 +80,7 @@ Um bot de Discord desenvolvido em Go que envia diariamente as conquistas da Stea
 ```
 .
 ├── discord-bot/         # Bot do Discord (escuta fila e envia mensagens)
-├── server/             # Lógica de extração e comparação de conquistas
+├── queue_worker/             # Worker para processar demais mensagens
 └── workflows/           # Workflows do Temporal
 ```
 
@@ -90,9 +96,9 @@ Esse projeto é open source sob a licença [MIT](LICENSE).
 
 - [x] Criação do bot e comando para adicionar conta
 - [x] Setup do RabbitMQ e conexão com o bot
-- [ ] Cadastro de SteamID via comando
-  - [ ] Verificar SteamID pela api
-  - [ ] Fazer integração com banco para guardar SteamID
+- [x] Cadastro de SteamID via comando
+  - [x] Verificar SteamID pela api
+  - [x] Fazer integração com banco para guardar SteamID
   - [ ] Enviar mensagem através do bot para informar a status
 - [ ] Workflow básico no Temporal
   - [ ] Extração dos últimos jogos para cada SteamID
