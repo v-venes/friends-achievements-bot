@@ -8,25 +8,29 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 	"github.com/v-venes/friends-achievements-bot/internal/queue_worker/handlers"
 	"github.com/v-venes/friends-achievements-bot/pkg/broker"
-	"github.com/v-venes/friends-achievements-bot/pkg/service"
+	"github.com/v-venes/friends-achievements-bot/pkg/repository"
+	steamclient "github.com/v-venes/friends-achievements-bot/pkg/steam_client"
 )
 
 type QueueWorker struct {
-	Broker      *broker.Broker
-	Queues      map[string]func(amqp091.Delivery)
-	SteamClient *service.SteamClient
+	Broker           *broker.Broker
+	Queues           map[string]func(amqp091.Delivery)
+	SteamClient      *steamclient.SteamClient
+	PlayerRepository *repository.PlayerRepository
 }
 
 type NewQueueWorkerParams struct {
-	Broker      *broker.Broker
-	SteamClient *service.SteamClient
+	Broker           *broker.Broker
+	SteamClient      *steamclient.SteamClient
+	PlayerRepository *repository.PlayerRepository
 }
 
 func NewQueueWorker(params NewQueueWorkerParams) *QueueWorker {
 	queueworker := &QueueWorker{
-		Broker:      params.Broker,
-		Queues:      map[string]func(amqp091.Delivery){},
-		SteamClient: params.SteamClient,
+		Broker:           params.Broker,
+		Queues:           map[string]func(amqp091.Delivery){},
+		SteamClient:      params.SteamClient,
+		PlayerRepository: params.PlayerRepository,
 	}
 
 	queueworker.registerHandlers()
@@ -36,8 +40,9 @@ func NewQueueWorker(params NewQueueWorkerParams) *QueueWorker {
 
 func (w *QueueWorker) registerHandlers() {
 	w.Queues[broker.BrokerQueues[broker.NewSteamId]] = handlers.NewSteamIDHandler(handlers.NewSteamIDHandlerParams{
-		SteamClient: w.SteamClient,
-		Broker:      w.Broker,
+		PlayerRepository: w.PlayerRepository,
+		SteamClient:      w.SteamClient,
+		Broker:           w.Broker,
 	})
 }
 

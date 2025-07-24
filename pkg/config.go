@@ -13,6 +13,9 @@ type Environment struct {
 	BrokerUsername  string `env:"BROKER_USERNAME"`
 	BrokerPassword  string `env:"BROKER_PASSWORD"`
 	SteamKey        string `env:"STEAM_KEY"`
+	MongoHost       string `env:"MONGO_HOST"`
+	MongoUsername   string `env:"MONGO_USERNAME"`
+	MongoPassword   string `env:"MONGO_PASSWORD"`
 }
 
 func GetEnvVars() *Environment {

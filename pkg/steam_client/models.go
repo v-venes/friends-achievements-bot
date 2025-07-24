@@ -1,4 +1,4 @@
-package models
+package steamclient
 
 type PlayerSummaryResponse struct {
 	Response PlayerList `json:"response"`

@@ -7,7 +7,6 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/v-venes/friends-achievements-bot/pkg/broker"
-	"github.com/v-venes/friends-achievements-bot/pkg/models"
 )
 
 type SlashCommand struct {
@@ -44,7 +43,7 @@ func GetSlashCommands(params SlashCommandRouterParams) []SlashCommand {
 
 				steamID := data.Options[0].StringValue()
 
-				payload := models.AddAccountMessage{
+				payload := broker.AddAccountMessage{
 					SteamID:    steamID,
 					Username:   i.Member.User.Username,
 					GuildID:    i.GuildID,

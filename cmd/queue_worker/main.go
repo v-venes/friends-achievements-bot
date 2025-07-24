@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -11,7 +12,10 @@ import (
 	queueworker "github.com/v-venes/friends-achievements-bot/internal/queue_worker"
 	"github.com/v-venes/friends-achievements-bot/pkg"
 	"github.com/v-venes/friends-achievements-bot/pkg/broker"
-	"github.com/v-venes/friends-achievements-bot/pkg/service"
+	"github.com/v-venes/friends-achievements-bot/pkg/repository"
+	steamclient "github.com/v-venes/friends-achievements-bot/pkg/steam_client"
+	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 func init() {
@@ -42,13 +46,32 @@ func main() {
 		log.Fatalf("Erro ao conectar com broker %s", err.Error())
 	}
 
-	steamClient := service.NewSteamClient(service.NewSteamClientParams{
+	mongoUri := fmt.Sprintf("mongodb://%s/", env.MongoHost)
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+	opts := options.Client().ApplyURI(mongoUri).SetServerAPIOptions(serverAPI)
+	mongoClient, err := mongo.Connect(opts)
+	if err != nil {
+		panic(err)
+	}
+
+	defer func() {
+		if err = mongoClient.Disconnect(context.TODO()); err != nil {
+			log.Fatalf("Erro ao conectar com mongo: %v", err)
+		}
+	}()
+
+	playerRepository := &repository.PlayerRepository{
+		MongoClient: mongoClient,
+	}
+
+	steamClient := steamclient.NewSteamClient(steamclient.NewSteamClientParams{
 		SteamKey: env.SteamKey,
 	})
 
 	worker := queueworker.NewQueueWorker(queueworker.NewQueueWorkerParams{
-		Broker:      newBroker,
-		SteamClient: steamClient,
+		Broker:           newBroker,
+		SteamClient:      steamClient,
+		PlayerRepository: playerRepository,
 	})
 
 	if err := worker.Run(ctx); err != nil {

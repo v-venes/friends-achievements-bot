@@ -1,12 +1,11 @@
-package service
+package steamclient
 
 import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
-
-	"github.com/v-venes/friends-achievements-bot/pkg/models"
 )
 
 const STEAM_BASE_URL = "http://api.steampowered.com"
@@ -28,7 +27,7 @@ func NewSteamClient(params NewSteamClientParams) *SteamClient {
 	}
 }
 
-func (s *SteamClient) GetPlayerSummary(steamid string) (*models.Player, error) {
+func (s *SteamClient) GetPlayerSummary(steamid string) (*Player, error) {
 	resp, err := s.httpClient.Get(fmt.Sprintf("%s/ISteamUser/GetPlayerSummaries/v0002/?key=%s&steamids=%s", STEAM_BASE_URL, s.steamKey, steamid))
 	if err != nil {
 		return nil, err
@@ -36,12 +35,16 @@ func (s *SteamClient) GetPlayerSummary(steamid string) (*models.Player, error) {
 
 	defer resp.Body.Close()
 
-	playerSummaryResponse := &models.PlayerSummaryResponse{}
+	playerSummaryResponse := &PlayerSummaryResponse{}
 
 	err = json.NewDecoder(resp.Body).Decode(&playerSummaryResponse)
 	if err != nil {
 		return nil, err
 	}
+
+	log.Printf("%v\n", playerSummaryResponse)
+	log.Printf("%v\n", playerSummaryResponse.Response)
+	log.Printf("%v\n", playerSummaryResponse.Response.Players)
 
 	if len(playerSummaryResponse.Response.Players) == 0 {
 		return nil, errors.New("No SteamID found!")

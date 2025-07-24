@@ -13,6 +13,7 @@ type BrokerQueueEnum int
 const (
 	NewSteamId BrokerQueueEnum = iota
 	NewAchievement
+	FeedbackMessages
 )
 
 const APP_BROKER_EXCHANGE = "ACHIEVEMENTS-BOT"
@@ -35,8 +36,9 @@ type SendMessageParams struct {
 }
 
 var BrokerQueues = map[BrokerQueueEnum]string{
-	NewSteamId:     "NEW_STEAM_ID",
-	NewAchievement: "NEW_ACHIEVEMENT",
+	NewSteamId:       "NEW_STEAM_ID",
+	NewAchievement:   "NEW_ACHIEVEMENT",
+	FeedbackMessages: "FEEDBACK_MESSAGES",
 }
 
 func NewBroker(params NewBroketParams) (*Broker, error) {
