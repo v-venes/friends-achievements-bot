@@ -99,8 +99,10 @@ Esse projeto é open source sob a licença [MIT](LICENSE).
 - [x] Cadastro de SteamID via comando
   - [x] Verificar SteamID pela api
   - [x] Fazer integração com banco para guardar SteamID
-  - [ ] Enviar mensagem através do bot para informar a status
-- [ ] Workflow básico no Temporal
+  - [x] Enviar mensagem através do bot para informar a status
+- [x] Workflow básico no Temporal
+  - [x] Subir temporal no docker compose
+  - [x] Conectar no temporal e registrar workflow
   - [ ] Extração dos últimos jogos para cada SteamID
   - [ ] Comparação de conquistas
   - [ ] Geração de imagem

@@ -16,6 +16,7 @@ type Environment struct {
 	MongoHost       string `env:"MONGO_HOST"`
 	MongoUsername   string `env:"MONGO_USERNAME"`
 	MongoPassword   string `env:"MONGO_PASSWORD"`
+	TemporalHost    string `env:"TEMPORAL_HOST"`
 }
 
 func GetEnvVars() *Environment {

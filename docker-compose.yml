@@ -2,6 +2,8 @@ services:
   rabbitmq:
     image: rabbitmq:3-management
     hostname: rabbitmq-host
+    networks:
+      - friends-achievements-network
     ports:
       - "10072:5672"
       - "10081:15672"
@@ -13,6 +15,8 @@ services:
 
   mongodb:
     image: mongo:7
+    networks:
+      - friends-achievements-network
     ports:
       - "10017:27017"
     volumes:
@@ -26,9 +30,72 @@ services:
       - ME_CONFIG_MONGODB_SERVER=mongodb
     ports:
       - "10082:8081"
+    networks:
+      - friends-achievements-network
     depends_on:
       - mongodb
+
+  postgresql:
+    environment:
+      POSTGRES_PASSWORD: temporal
+      POSTGRES_USER: temporal
+    image: postgres:${POSTGRESQL_VERSION}
+    ports:
+      - 10032:5432
+    networks:
+      - friends-achievements-network
+    volumes:
+      - /var/lib/postgresql/data
+
+  temporal:
+    depends_on:
+      - postgresql
+    environment:
+      - DB=postgres12
+      - DB_PORT=5432
+      - POSTGRES_USER=temporal
+      - POSTGRES_PWD=temporal
+      - POSTGRES_SEEDS=postgresql
+      - DYNAMIC_CONFIG_FILE_PATH=config/dynamicconfig/development-sql.yaml
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CLI_ADDRESS=temporal:7233
+    image: temporalio/auto-setup:${TEMPORAL_VERSION}
+    networks:
+      - friends-achievements-network
+    ports:
+      - 10033:7233
+    volumes:
+      - ./dynamicconfig:/etc/temporal/config/dynamicconfig
+
+  temporal-admin-tools:
+    depends_on:
+      - temporal
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CLI_ADDRESS=temporal:7233
+    image: temporalio/admin-tools:${TEMPORAL_ADMINTOOLS_VERSION}
+    networks:
+      - friends-achievements-network
+    stdin_open: true
+    tty: true
+
+  temporal-ui:
+    depends_on:
+      - temporal
+    environment:
+      - TEMPORAL_ADDRESS=temporal:7233
+      - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+    image: temporalio/ui:${TEMPORAL_UI_VERSION}
+    networks:
+      - friends-achievements-network
+    ports:
+      - 10083:8080
 
 volumes:
   rabbitmq_data:
   mongo_data:
+
+networks:
+  friends-achievements-network:
+    driver: bridge
+    name: friends-achievements-network
