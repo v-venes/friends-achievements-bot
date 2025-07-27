@@ -8,6 +8,7 @@ import (
 
 	"github.com/bwmarrin/discordgo"
 	"github.com/v-venes/friends-achievements-bot/internal/discord-bot/commands"
+	"github.com/v-venes/friends-achievements-bot/internal/queue_worker/handlers"
 	"github.com/v-venes/friends-achievements-bot/pkg/broker"
 )
 
@@ -82,6 +83,23 @@ func (b *Bot) unregisterCommands(commands []commands.SlashCommand) {
 	}
 }
 
+func (b *Bot) consumeFeedbackQueue() error {
+	msgs, err := b.broker.ReceiveMessages(broker.BrokerQueues[broker.FeedbackMessages])
+
+	if err != nil {
+		return err
+	}
+
+	for msg := range msgs {
+		go func() {
+			handlers.NewFeedbackHandler(handlers.NewFeedbackHandlerParams{DiscordSession: b.discordSession})(msg)
+		}()
+
+	}
+
+	return nil
+}
+
 func (b *Bot) Run() error {
 	err := b.discordSession.Open()
 	if err != nil {
@@ -93,6 +111,12 @@ func (b *Bot) Run() error {
 	commands := commands.GetSlashCommands(commands.SlashCommandRouterParams{Broker: b.broker})
 	handlers := b.registerCommands(commands)
 	b.registerHandlers(handlers)
+
+	err = b.consumeFeedbackQueue()
+	if err != nil {
+		fmt.Printf("Cannot consume queue: %v", err)
+		return err
+	}
 
 	defer b.discordSession.Close()
 

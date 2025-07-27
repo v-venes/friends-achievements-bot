@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"net/http"
 )
 
@@ -41,10 +40,6 @@ func (s *SteamClient) GetPlayerSummary(steamid string) (*Player, error) {
 	if err != nil {
 		return nil, err
 	}
-
-	log.Printf("%v\n", playerSummaryResponse)
-	log.Printf("%v\n", playerSummaryResponse.Response)
-	log.Printf("%v\n", playerSummaryResponse.Response.Players)
 
 	if len(playerSummaryResponse.Response.Players) == 0 {
 		return nil, errors.New("No SteamID found!")

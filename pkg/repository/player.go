@@ -5,7 +5,9 @@ import (
 	"time"
 
 	steamclient "github.com/v-venes/friends-achievements-bot/pkg/steam_client"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
+	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
 const (
@@ -18,7 +20,7 @@ type PlayerRepository struct {
 }
 
 type PlayerModel struct {
-	SteamID                string    `bson:"steamid"`
+	SteamID                string    `bson:"steam_id"`
 	ProfileVisibilityState int       `bson:"profile_visibility_state"`
 	Name                   string    `bson:"name"`
 	ProfileURL             string    `bson:"profile_url"`
@@ -50,10 +52,22 @@ func NewPlayerFromSteam(resp *steamclient.Player) *PlayerModel {
 }
 
 func (pr *PlayerRepository) CreatePlayer(player PlayerModel) error {
-	_, err := pr.MongoClient.Database(DEFAULT_DATABASE).Collection(PLAYER_COLLECTION).InsertOne(context.TODO(), player)
+	playerCollection := pr.MongoClient.Database(DEFAULT_DATABASE).Collection(PLAYER_COLLECTION)
+
+	updateDoc, err := bson.Marshal(player)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	var document bson.M
+	err = bson.Unmarshal(updateDoc, &document)
+	if err != nil {
+		return err
+	}
+
+	update := bson.M{"$set": document}
+	filter := bson.M{"steam_id": player.SteamID}
+	opts := options.UpdateOne().SetUpsert(true)
+	_, err = playerCollection.UpdateOne(context.TODO(), filter, update, opts)
+	return err
 }
