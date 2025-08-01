@@ -34,7 +34,7 @@ func (s *SteamClient) GetPlayerSummary(steamid string) (*Player, error) {
 
 	defer resp.Body.Close()
 
-	playerSummaryResponse := &PlayerSummaryResponse{}
+	playerSummaryResponse := &ApiResponse[PlayerList]{}
 
 	err = json.NewDecoder(resp.Body).Decode(&playerSummaryResponse)
 	if err != nil {
@@ -46,4 +46,22 @@ func (s *SteamClient) GetPlayerSummary(steamid string) (*Player, error) {
 	}
 
 	return &playerSummaryResponse.Response.Players[0], nil
+}
+
+func (s *SteamClient) GetRecentlyPlayedGames(steamid string) (*RecentlyPlayedGames, error) {
+	resp, err := s.httpClient.Get(fmt.Sprintf("%s/IPlayerService/GetRecentlyPlayedGames/v0001/?key=%s&steamid=%s&format=json", STEAM_BASE_URL, s.steamKey, steamid))
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	recentlyPlayedGamesResponse := &ApiResponse[RecentlyPlayedGames]{}
+
+	err = json.NewDecoder(resp.Body).Decode(&recentlyPlayedGamesResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return &recentlyPlayedGamesResponse.Response, nil
 }

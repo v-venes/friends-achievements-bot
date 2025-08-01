@@ -1,7 +1,7 @@
 package steamclient
 
-type PlayerSummaryResponse struct {
-	Response PlayerList `json:"response"`
+type ApiResponse[T any] struct {
+	Response T `json:"response"`
 }
 
 type PlayerList struct {
@@ -28,4 +28,17 @@ type Player struct {
 	LocCountryCode           string `json:"loccountrycode"`
 	LocStateCode             string `json:"locstatecode"`
 	LocCityID                int    `json:"loccityid"`
+}
+
+type RecentlyPlayedGames struct {
+	TotalCount int                  `json:"total_count"`
+	Games      []RecentlyPlayedGame `json:"games"`
+}
+
+type RecentlyPlayedGame struct {
+	AppID            int    `json:"appid"`
+	Name             string `json:"name"`
+	PlaytimeTwoWeeks int    `json:"playtime_2weeks"`
+	PlaytimeForever  int    `json:"playtime_forever"`
+	ImgIconUrl       string `json:"img_icon_url"`
 }

@@ -4,11 +4,10 @@ import (
 	"log"
 
 	"github.com/joho/godotenv"
-	"github.com/v-venes/friends-achievements-bot/cmd/workflow_worker/workflows"
+	workflowworker "github.com/v-venes/friends-achievements-bot/internal/workflow_worker"
 	"github.com/v-venes/friends-achievements-bot/pkg"
+	steamclient "github.com/v-venes/friends-achievements-bot/pkg/steam_client"
 	"go.temporal.io/sdk/client"
-	"go.temporal.io/sdk/worker"
-	"go.temporal.io/sdk/workflow"
 )
 
 func init() {
@@ -22,6 +21,10 @@ func main() {
 	env := pkg.GetEnvVars()
 	log.Printf("env %s", env.TemporalHost)
 
+	steamClient := steamclient.NewSteamClient(steamclient.NewSteamClientParams{
+		SteamKey: env.SteamKey,
+	})
+
 	temporalClient, err := client.Dial(client.Options{
 		HostPort: env.TemporalHost,
 	})
@@ -30,18 +33,10 @@ func main() {
 		log.Fatalf("Erro ao conectar com Temporal: %s", err.Error())
 	}
 
-	temporalWorker := worker.New(temporalClient, "steam-achievements", worker.Options{})
+	workflowWorker := workflowworker.NewWorkflowWorker(workflowworker.NewWorkflowWorkerParams{
+		Client:      temporalClient,
+		SteamClient: steamClient,
+	})
 
-	worklfowOptions := workflow.RegisterOptions{
-		Name: "ExtractPlayerGames",
-	}
-	temporalWorker.RegisterWorkflowWithOptions(workflows.ExtractPlayerGames, worklfowOptions)
-
-	err = temporalWorker.Run(worker.InterruptCh())
-	if err != nil {
-		log.Fatalf("Erro ao iniciar worker: %s", err.Error())
-	}
-
-	// Extrair jogos recentes (assim que adicionar o steamID)
-
+	workflowWorker.Run()
 }
