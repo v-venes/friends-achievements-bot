@@ -9,8 +9,15 @@ type PlayerActivities struct {
 	PlayerRepository *repository.PlayerRepository
 }
 
-func (p *PlayerActivities) SaveRecentlyPlayedGames(recentlyPlayedGames steamclient.RecentlyPlayedGames) error {
-	p.PlayerRepository.CreatePlayer()
+func (p *PlayerActivities) SavePlayerGamesAchievements(steamID string, recentlyPlayedGames steamclient.RecentlyPlayedGames, gamesAchievements map[int]*steamclient.GameStats) error {
+
+	playerGamesAchievements := repository.NewPlayerGameAchievementsFromSteam(steamID, recentlyPlayedGames, gamesAchievements)
+
+	err := p.PlayerRepository.CreatePlayerGamesAchievements(playerGamesAchievements)
+
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -65,3 +65,21 @@ func (s *SteamClient) GetRecentlyPlayedGames(steamid string) (*RecentlyPlayedGam
 
 	return &recentlyPlayedGamesResponse.Response, nil
 }
+
+func (s *SteamClient) GetGameStats(steamid string, appid int) (*PlayerGameStats, error) {
+	resp, err := s.httpClient.Get(fmt.Sprintf("%s/ISteamUserStats/GetUserStatsForGame/v0002/?key=%s&steamid=%s&appid=%d", STEAM_BASE_URL, s.steamKey, steamid, appid))
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	playerStatsReponse := &PlayerGameStats{}
+
+	err = json.NewDecoder(resp.Body).Decode(&playerStatsReponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return playerStatsReponse, nil
+}

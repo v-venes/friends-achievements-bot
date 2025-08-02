@@ -11,8 +11,8 @@ import (
 )
 
 const (
-	PLAYER_COLLECTION = "players"
 	DEFAULT_DATABASE  = "achievements"
+	PLAYER_COLLECTION = "players"
 )
 
 type PlayerRepository struct {
@@ -20,7 +20,7 @@ type PlayerRepository struct {
 }
 
 type PlayerModel struct {
-	SteamID                string    `bson:"steam_id"`
+	PlayerID               string    `bson:"player_id"`
 	ProfileVisibilityState int       `bson:"profile_visibility_state"`
 	Name                   string    `bson:"name"`
 	ProfileURL             string    `bson:"profile_url"`
@@ -36,7 +36,7 @@ type PlayerModel struct {
 
 func NewPlayerFromSteam(resp *steamclient.Player) *PlayerModel {
 	return &PlayerModel{
-		SteamID:                resp.SteamID,
+		PlayerID:               resp.SteamID,
 		ProfileVisibilityState: resp.CommunityVisibilityState,
 		Name:                   resp.PersonaName,
 		ProfileURL:             resp.ProfileURL,
@@ -66,13 +66,8 @@ func (pr *PlayerRepository) CreatePlayer(player PlayerModel) error {
 	}
 
 	update := bson.M{"$set": document}
-	filter := bson.M{"steam_id": player.SteamID}
+	filter := bson.M{"player_id": player.PlayerID}
 	opts := options.UpdateOne().SetUpsert(true)
 	_, err = playerCollection.UpdateOne(context.TODO(), filter, update, opts)
 	return err
-}
-
-func (pr *PlayerRepository) SaveRecentlyPlayedGames() error {
-
-	return nil
 }
