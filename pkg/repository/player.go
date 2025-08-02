@@ -71,3 +71,8 @@ func (pr *PlayerRepository) CreatePlayer(player PlayerModel) error {
 	_, err = playerCollection.UpdateOne(context.TODO(), filter, update, opts)
 	return err
 }
+
+func (pr *PlayerRepository) SaveRecentlyPlayedGames() error {
+
+	return nil
+}

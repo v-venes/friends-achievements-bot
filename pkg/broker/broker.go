@@ -14,6 +14,7 @@ const (
 	NewSteamId BrokerQueueEnum = iota
 	NewAchievement
 	FeedbackMessages
+	ExtractGames
 )
 
 const APP_BROKER_EXCHANGE = "ACHIEVEMENTS-BOT"

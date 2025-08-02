@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/v-venes/friends-achievements-bot/internal/workflow_worker/activities"
+	"github.com/v-venes/friends-achievements-bot/pkg/broker"
 	steamclient "github.com/v-venes/friends-achievements-bot/pkg/steam_client"
 	"go.temporal.io/sdk/workflow"
 )
@@ -30,6 +31,11 @@ func ExtractRecentlyPlayedGamesWorkflow(ctx workflow.Context, steamID string) er
 	}
 	logger.Info("Ready to save found games")
 
-	// enviar para extração do jogo, informações do jogo e achievements
+	err = workflow.ExecuteActivity(ctx, (*activities.QueueActivities).SendMessageToQueue, broker.ExtractGames, "").Get(ctx, nil)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
