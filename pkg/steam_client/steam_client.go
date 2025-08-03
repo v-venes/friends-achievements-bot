@@ -7,7 +7,10 @@ import (
 	"net/http"
 )
 
-const STEAM_BASE_URL = "http://api.steampowered.com"
+const (
+	STEAM_BASE_URL       = "http://api.steampowered.com"
+	STEAM_STORE_BASE_URL = "https://store.steampowered.com/"
+)
 
 type SteamClient struct {
 	steamKey   string
@@ -82,4 +85,45 @@ func (s *SteamClient) GetGameStats(steamid string, appid int) (*PlayerGameStats,
 	}
 
 	return playerStatsReponse, nil
+}
+
+func (s *SteamClient) GetGameDetails(appid int) (*GameDetailsData, error) {
+	resp, err := s.httpClient.Get(fmt.Sprintf("%s/api/appdetails?appids=%d&cc=br&l=portuguese", STEAM_STORE_BASE_URL, appid))
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	var gameDetailsReponse map[int]GameDetails
+
+	err = json.NewDecoder(resp.Body).Decode(&gameDetailsReponse)
+	if err != nil {
+		return nil, err
+	}
+
+	gameDetailsData := gameDetailsReponse[appid].Data
+
+	return &gameDetailsData, nil
+}
+
+func (s *SteamClient) GetAllGameAchievements(appid int) (*AllGameAchievements, error) {
+	resp, err := s.httpClient.Get(fmt.Sprintf("%s/ISteamUserStats/GetSchemaForGame/v2/?key=%s&appid=%d", STEAM_BASE_URL, s.steamKey, appid))
+	if err != nil {
+		return nil, err
+	}
+
+	defer resp.Body.Close()
+
+	gameDetailsReponse := &AllGameAchievementsReponse{}
+
+	err = json.NewDecoder(resp.Body).Decode(&gameDetailsReponse)
+	if err != nil {
+		return nil, err
+	}
+
+	gameDetailsData := gameDetailsReponse.Game
+	gameDetailsData.AppID = appid
+
+	return &gameDetailsData, nil
 }

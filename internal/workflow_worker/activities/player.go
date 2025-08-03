@@ -21,3 +21,26 @@ func (p *PlayerActivities) SavePlayerGamesAchievements(steamID string, recentlyP
 
 	return nil
 }
+
+func (p *PlayerActivities) SaveGameData(gameDetails *steamclient.GameDetailsData, gameAchievements *steamclient.AllGameAchievements) error {
+
+	gameData := repository.NewGameDataFromSteam(gameDetails, gameAchievements)
+
+	err := p.PlayerRepository.SaveGameData(gameData)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *PlayerActivities) GetGameDataByAppID(appID int) (*repository.Game, error) {
+	game, err := p.PlayerRepository.GetGameByAppID(appID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return game, nil
+}

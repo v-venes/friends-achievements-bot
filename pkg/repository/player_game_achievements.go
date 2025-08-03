@@ -11,14 +11,14 @@ import (
 const PLAYER_GAMES_ACHIEVEMENTS_COLLECTION = "players_achievements"
 
 type PlayerGameAchievements struct {
-	AppID        int               `bson:"appid"`
-	PlayerID     string            `bson:"player_id"`
-	AppName      string            `bson:"app_name"`
-	LastChecked  time.Time         `bson:"last_checked"`
-	Achievements []GameAchievement `bson:"achievements"`
+	AppID        int                     `bson:"app_id"`
+	PlayerID     string                  `bson:"player_id"`
+	AppName      string                  `bson:"app_name"`
+	LastChecked  time.Time               `bson:"last_checked"`
+	Achievements []PlayerGameAchievement `bson:"achievements"`
 }
 
-type GameAchievement struct {
+type PlayerGameAchievement struct {
 	AchievementID string    `bson:"achievement_id"`
 	Achieved      bool      `bson:"achieved"`
 	UnclockedAt   time.Time `bson:"unlocked_at"`
@@ -29,7 +29,7 @@ func NewPlayerGameAchievementsFromSteam(playerID string, recentlyPlayedGames ste
 
 	for _, game := range recentlyPlayedGames.Games {
 		//TODO: Melhorar o parse dos achievements
-		achievements := []GameAchievement{}
+		achievements := []PlayerGameAchievement{}
 
 		_, ok := gamesAchievements[game.AppID]
 		if !ok {
@@ -37,7 +37,7 @@ func NewPlayerGameAchievementsFromSteam(playerID string, recentlyPlayedGames ste
 		}
 
 		for _, achievement := range gamesAchievements[game.AppID].Achievements {
-			achievements = append(achievements, GameAchievement{
+			achievements = append(achievements, PlayerGameAchievement{
 				AchievementID: achievement.Name,
 				Achieved:      achievement.Achieved != 0,
 				UnclockedAt:   time.Now(),

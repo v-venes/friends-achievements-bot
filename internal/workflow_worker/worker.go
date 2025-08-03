@@ -45,18 +45,20 @@ func (w *WorkflowWorker) Run() {
 }
 
 func (w *WorkflowWorker) registerWorkflowsAndActivities() {
-	worklfowOptions := workflow.RegisterOptions{
+	w.worker.RegisterWorkflowWithOptions(workflows.ExtractNewPlayerDataWorkflow, workflow.RegisterOptions{
 		Name: "ExtractNewPlayerData",
-	}
-	w.worker.RegisterWorkflowWithOptions(workflows.ExtractNewPlayerDataWorkflow, worklfowOptions)
+	})
+	w.worker.RegisterWorkflowWithOptions(workflows.ExtractGameDataWorkflow, workflow.RegisterOptions{
+		Name: "ExtractGameData",
+	})
 
 	steamActivities := &activities.SteamActivities{
 		Client: w.steamClient,
 	}
-
 	playerActitivities := &activities.PlayerActivities{
 		PlayerRepository: w.playerRepository,
 	}
+
 	w.worker.RegisterActivity(steamActivities)
 	w.worker.RegisterActivity(playerActitivities)
 }

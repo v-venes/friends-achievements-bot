@@ -49,3 +49,31 @@ func (s *SteamActivities) GetAchievementsForGames(ctx context.Context, steamID s
 
 	return gamesAchievements, nil
 }
+
+func (s *SteamActivities) GetGameDetails(ctx context.Context, appID int) (*steamclient.GameDetailsData, error) {
+	logger := activity.GetLogger(ctx)
+	logger.Info("GetGameDetails started for", "appID", appID)
+
+	gameDetails, err := s.Client.GetGameDetails(appID)
+
+	if err != nil {
+		logger.Error("Get Recently Playerd Games", "Error", err.Error())
+		return nil, err
+	}
+
+	return gameDetails, nil
+}
+
+func (s *SteamActivities) GetAllGameAchievements(ctx context.Context, appID int) (*steamclient.AllGameAchievements, error) {
+	logger := activity.GetLogger(ctx)
+	logger.Info("GetAllGameAchievements started for", "appID", appID)
+
+	gameAchievements, err := s.Client.GetAllGameAchievements(appID)
+
+	if err != nil {
+		logger.Error("Get Recently Playerd Games", "Error", err.Error())
+		return nil, err
+	}
+
+	return gameAchievements, nil
+}

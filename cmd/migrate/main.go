@@ -67,12 +67,25 @@ func createIndexes(database *mongo.Database) error {
 	playersAchievementsIndex := mongo.IndexModel{
 		Keys: bson.D{
 			{Key: "player_id", Value: 1},
-			{Key: "appid", Value: 1},
+			{Key: "app_id", Value: 1},
 		},
 		Options: options.Index().SetUnique(true),
 	}
 
 	_, err = playerAchievementsCollection.Indexes().CreateOne(ctx, playersAchievementsIndex)
+	if err != nil {
+		return err
+	}
+
+	gamesCollection := database.Collection(repository.GAMES_COLLECTION)
+	gamesIndex := mongo.IndexModel{
+		Keys: bson.D{
+			{Key: "app_id", Value: 1},
+		},
+		Options: options.Index().SetUnique(true),
+	}
+
+	_, err = gamesCollection.Indexes().CreateOne(ctx, gamesIndex)
 	if err != nil {
 		return err
 	}

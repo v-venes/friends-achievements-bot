@@ -56,3 +56,38 @@ type GameStatsAchievements struct {
 	Name     string `json:"name"`
 	Achieved int    `json:"achieved"`
 }
+
+type GameDetailsResponse map[string]GameDetails
+
+type GameDetails struct {
+	Success bool            `json:"success"`
+	Data    GameDetailsData `json:"data"`
+}
+
+type GameDetailsData struct {
+	Type             string `json:"type"`
+	Name             string `json:"name"`
+	AppID            int    `json:"steam_appid"`
+	ShortDescription string `json:"short_description"`
+	HeaderImage      string `json:"header_image"`
+}
+
+type AllGameAchievementsReponse struct {
+	Game AllGameAchievements `json:"game"`
+}
+
+type AllGameAchievements struct {
+	AppID             int               `json:"appid"`
+	AvaiableGameStats AvaiableGameStats `json:"availableGameStats"`
+}
+
+type AvaiableGameStats struct {
+	Achievements []GameAchievement `json:"achievements"`
+}
+
+type GameAchievement struct {
+	Name        string `json:"name"`
+	DisplayName string `json:"displayName"`
+	Description string `json:"description"`
+	Icon        string `json:"icon"`
+}
