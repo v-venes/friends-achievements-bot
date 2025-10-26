@@ -32,7 +32,7 @@ func (s *SteamActivities) GetAchievementsForGames(ctx context.Context, steamID s
 	gamesAchievements := map[int]steamclient.GameStats{}
 
 	for _, game := range recentlyPlayedGames.Games {
-		gameStats, err := s.Client.GetGameStats(steamID, game.AppID)
+		gameStats, err := s.Client.GetPlayerAchievements(steamID, game.AppID)
 
 		if gameStats.PlayerStats.Achievements == nil {
 			logger.Info("Achievements not found", "AppID", game.AppID)
@@ -76,4 +76,14 @@ func (s *SteamActivities) GetAllGameAchievements(ctx context.Context, appID int)
 	}
 
 	return gameAchievements, nil
+}
+
+func (s *SteamActivities) FilterNewAchievements(ctx context.Context, gamesAchievements map[int]*steamclient.GameStats) error {
+
+	// Filtrar achievements do usuário por jogo
+	//
+	// Verificar quais achievements estão com unlocked true
+	//
+	// Retornar novos achievements
+	return nil
 }

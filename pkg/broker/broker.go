@@ -40,6 +40,7 @@ var BrokerQueues = map[BrokerQueueEnum]string{
 	NewSteamId:       "NEW_STEAM_ID",
 	NewAchievement:   "NEW_ACHIEVEMENT",
 	FeedbackMessages: "FEEDBACK_MESSAGES",
+	ExtractGames:     "EXTRACT_GAMES",
 }
 
 func NewBroker(params NewBroketParams) (*Broker, error) {

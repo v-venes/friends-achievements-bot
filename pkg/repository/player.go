@@ -71,3 +71,22 @@ func (pr *PlayerRepository) CreatePlayer(player PlayerModel) error {
 	_, err = playerCollection.UpdateOne(context.TODO(), filter, update, opts)
 	return err
 }
+
+func (pr *PlayerRepository) GetAll() (*[]PlayerModel, error) {
+	playerCollection := pr.MongoClient.Database(DEFAULT_DATABASE).Collection(PLAYER_COLLECTION)
+	filter := bson.M{}
+
+	cursor, err := playerCollection.Find(context.TODO(), filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var players []PlayerModel
+	err = cursor.All(context.TODO(), &players)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &players, nil
+}

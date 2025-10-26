@@ -1,3 +1,4 @@
+name: friends-achievements-bot
 services:
   rabbitmq:
     image: rabbitmq:3-management

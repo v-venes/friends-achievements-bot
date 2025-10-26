@@ -69,15 +69,15 @@ func (s *SteamClient) GetRecentlyPlayedGames(steamid string) (*RecentlyPlayedGam
 	return &recentlyPlayedGamesResponse.Response, nil
 }
 
-func (s *SteamClient) GetGameStats(steamid string, appid int) (*PlayerGameStats, error) {
-	resp, err := s.httpClient.Get(fmt.Sprintf("%s/ISteamUserStats/GetUserStatsForGame/v0002/?key=%s&steamid=%s&appid=%d", STEAM_BASE_URL, s.steamKey, steamid, appid))
+func (s *SteamClient) GetPlayerAchievements(steamid string, appid int) (*PlayerGameAchievements, error) {
+	resp, err := s.httpClient.Get(fmt.Sprintf("%s/ISteamUserStats/GetPlayerAchievements/v0001/?key=%s&steamid=%s&appid=%d", STEAM_BASE_URL, s.steamKey, steamid, appid))
 	if err != nil {
 		return nil, err
 	}
 
 	defer resp.Body.Close()
 
-	playerStatsReponse := &PlayerGameStats{}
+	playerStatsReponse := &PlayerGameAchievements{}
 
 	err = json.NewDecoder(resp.Body).Decode(&playerStatsReponse)
 	if err != nil {

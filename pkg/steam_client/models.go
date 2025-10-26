@@ -43,17 +43,17 @@ type RecentlyPlayedGame struct {
 	ImgIconUrl       string `json:"img_icon_url"`
 }
 
-type PlayerGameStats struct {
+type PlayerGameAchievements struct {
 	PlayerStats GameStats `json:"playerstats"`
 }
 
 type GameStats struct {
-	SteamID      string                  `json:"steamID"`
-	Achievements []GameStatsAchievements `json:"achievements"`
+	SteamID      string             `json:"steamID"`
+	Achievements []GameAchievements `json:"achievements"`
 }
 
-type GameStatsAchievements struct {
-	Name     string `json:"name"`
+type GameAchievements struct {
+	Name     string `json:"apiname"`
 	Achieved int    `json:"achieved"`
 }
 

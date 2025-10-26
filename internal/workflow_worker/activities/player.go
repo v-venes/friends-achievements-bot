@@ -44,3 +44,37 @@ func (p *PlayerActivities) GetGameDataByAppID(appID int) (*repository.Game, erro
 
 	return game, nil
 }
+
+func (p *PlayerActivities) GetNotFoundGames(appIDs []int) (*[]int, error) {
+	games, err := p.PlayerRepository.FindGamesByAppID(appIDs)
+
+	if err != nil {
+		return nil, err
+	}
+
+	gamesSet := make(map[int]*repository.Game)
+	for _, game := range *games {
+		gamesSet[game.AppID] = &game
+	}
+
+	var notFoundIDs []int
+
+	for _, appID := range appIDs {
+		_, ok := gamesSet[appID]
+		if !ok {
+			notFoundIDs = append(notFoundIDs, appID)
+		}
+	}
+
+	return &notFoundIDs, nil
+}
+
+func (p *PlayerActivities) GetAllPlayers() (*[]repository.PlayerModel, error) {
+	players, err := p.PlayerRepository.GetAll()
+
+	if err != nil {
+		return nil, err
+	}
+
+	return players, nil
+}
