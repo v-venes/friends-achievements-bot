@@ -51,6 +51,12 @@ func (w *WorkflowWorker) registerWorkflowsAndActivities() {
 	w.worker.RegisterWorkflowWithOptions(workflows.ExtractGameDataWorkflow, workflow.RegisterOptions{
 		Name: "ExtractGameData",
 	})
+	w.worker.RegisterWorkflowWithOptions(workflows.FindNewAchievementsWorkflow, workflow.RegisterOptions{
+		Name: "FindNewAchievements",
+	})
+	w.worker.RegisterWorkflowWithOptions(workflows.DailyAchievementsVerificationWorkflow, workflow.RegisterOptions{
+		Name: "DailyAchievementsVerification",
+	})
 
 	steamActivities := &activities.SteamActivities{
 		Client: w.steamClient,

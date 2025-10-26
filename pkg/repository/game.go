@@ -64,6 +64,25 @@ func (pr *PlayerRepository) GetGameByAppID(appID int) (*Game, error) {
 	return &game, nil
 }
 
+func (pr *PlayerRepository) FindGamesByAppID(appIDs []int) (*[]Game, error) {
+	gamesCollection := pr.MongoClient.Database(DEFAULT_DATABASE).Collection(GAMES_COLLECTION)
+	filter := bson.M{
+		"app_id": bson.M{"$in": appIDs},
+	}
+
+	cursor, err := gamesCollection.Find(context.TODO(), filter)
+	if err != nil {
+		return nil, err
+	}
+
+	var results *[]Game
+	if err = cursor.All(context.TODO(), &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
+
 func (pr *PlayerRepository) SaveGameData(game *Game) error {
 	gamesCollection := pr.MongoClient.Database(DEFAULT_DATABASE).Collection(GAMES_COLLECTION)
 	_, err := gamesCollection.InsertOne(context.TODO(), game)
